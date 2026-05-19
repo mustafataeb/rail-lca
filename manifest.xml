@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  Rail-LCA Excel Add-in — manifest.xml                       ║
+  ║                                                              ║
+  ║  BEFORE YOU USE THIS:                                        ║
+  ║  Replace every instance of:                                  ║
+  ║    YOUR-USERNAME  →  your GitHub username                    ║
+  ║    YOUR-REPO      →  your GitHub repository name             ║
+  ║                                                              ║
+  ║  Example: if your GitHub Pages URL is                        ║
+  ║    https://john123.github.io/rail-lca                        ║
+  ║  then replace with:                                          ║
+  ║    YOUR-USERNAME = john123                                    ║
+  ║    YOUR-REPO     = rail-lca                                  ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+  xsi:type="TaskPaneApp">
+
+  <!-- Unique ID — do NOT change after first install -->
+  <Id>C9D8E7F6-A5B4-3210-9876-FEDCBA012345</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Rail-LCA</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Rail-LCA Manager"/>
+  <Description DefaultValue="CRUD task panes for Project LC, Definition and Input sheets"/>
+
+  <!-- Icons: hosted on GitHub Pages -->
+  <IconUrl DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/assets/icon-80.png"/>
+  <SupportUrl DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO"/>
+
+  <!-- Allow GitHub Pages domain -->
+  <AppDomains>
+    <AppDomain>https://YOUR-USERNAME.github.io</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Workbook"/>
+  </Hosts>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/taskpane.html"/>
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Workbook">
+        <DesktopFormFactor>
+
+          <GetStarted>
+            <Title resid="GetStarted.Title"/>
+            <Description resid="GetStarted.Description"/>
+            <LearnMoreUrl resid="LearnMoreUrl"/>
+          </GetStarted>
+
+          <FunctionFile resid="Commands.Url"/>
+
+          <!-- ═══════════════════════════════════════════════════
+               RIBBON DEFINITION
+               Three buttons → one custom "Rail-LCA" tab
+          ════════════════════════════════════════════════════ -->
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <CustomTab id="Rail.LCA.Tab">
+              <Label resid="Tab.Label"/>
+
+              <Group id="Rail.LCA.Group">
+                <Label resid="Group.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16"/>
+                  <bt:Image size="32" resid="Icon.32"/>
+                  <bt:Image size="80" resid="Icon.80"/>
+                </Icon>
+
+                <!-- ── Button 1: Project LC ── -->
+                <Control xsi:type="Button" id="Btn.ProjectLC">
+                  <Label resid="Btn.LC.Label"/>
+                  <Supertip>
+                    <Title resid="Btn.LC.Label"/>
+                    <Description resid="Btn.LC.Desc"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>Rail.Pane.LC</TaskpaneId>
+                    <SourceLocation resid="LC.Url"/>
+                  </Action>
+                </Control>
+
+                <!-- ── Button 2: Project Definition ── -->
+                <Control xsi:type="Button" id="Btn.ProjectDef">
+                  <Label resid="Btn.Def.Label"/>
+                  <Supertip>
+                    <Title resid="Btn.Def.Label"/>
+                    <Description resid="Btn.Def.Desc"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>Rail.Pane.Def</TaskpaneId>
+                    <SourceLocation resid="Def.Url"/>
+                  </Action>
+                </Control>
+
+                <!-- ── Button 3: Project Input ── -->
+                <Control xsi:type="Button" id="Btn.ProjectInput">
+                  <Label resid="Btn.Input.Label"/>
+                  <Supertip>
+                    <Title resid="Btn.Input.Label"/>
+                    <Description resid="Btn.Input.Desc"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>Rail.Pane.Input</TaskpaneId>
+                    <SourceLocation resid="Input.Url"/>
+                  </Action>
+                </Control>
+
+              </Group>
+            </CustomTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <!-- ═══════════════════════════════════════════════════════
+         RESOURCES — Replace YOUR-USERNAME and YOUR-REPO below
+    ════════════════════════════════════════════════════════ -->
+    <Resources>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title"   DefaultValue="Rail-LCA Add-in loaded"/>
+        <bt:String id="Tab.Label"          DefaultValue="Rail-LCA"/>
+        <bt:String id="Group.Label"        DefaultValue="LCA Sheets"/>
+        <bt:String id="Btn.LC.Label"       DefaultValue="📋 Project LC"/>
+        <bt:String id="Btn.Def.Label"      DefaultValue="🗂 Project Definition"/>
+        <bt:String id="Btn.Input.Label"    DefaultValue="⚡ Project Input"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="Use the Rail-LCA tab in the ribbon to manage your LCA data."/>
+        <bt:String id="Btn.LC.Desc"    DefaultValue="Edit life span, route, infrastructure inventory and maintenance cycles."/>
+        <bt:String id="Btn.Def.Desc"   DefaultValue="Edit scope, material, transportation and installation descriptions."/>
+        <bt:String id="Btn.Input.Desc" DefaultValue="Add, edit or delete material rows and equipment gang rows."/>
+        <bt:String id="LearnMoreUrl"   DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO"/>
+      </bt:LongStrings>
+      <bt:Urls>
+        <bt:Url id="Commands.Url" DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/commands.html"/>
+        <bt:Url id="LC.Url"       DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/taskpane.html?sheet=projectlc"/>
+        <bt:Url id="Def.Url"      DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/taskpane.html?sheet=projectdef"/>
+        <bt:Url id="Input.Url"    DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/taskpane.html?sheet=projectinput"/>
+      </bt:Urls>
+      <bt:Images>
+        <bt:Image id="Icon.16" DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/assets/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/assets/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://YOUR-USERNAME.github.io/YOUR-REPO/assets/icon-80.png"/>
+      </bt:Images>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

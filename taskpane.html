@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rail-LCA Manager</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@600;700;800&display=swap');
+
+:root {
+  --bg:       #0d0f14;
+  --surface:  #141720;
+  --surface2: #1c2030;
+  --border:   #2a2f45;
+  --accent:   #e8b84b;
+  --accent2:  #4be8b8;
+  --accent3:  #b84be8;
+  --text:     #e8ecf0;
+  --muted:    #6b7280;
+  --danger:   #e84b4b;
+  --success:  #4be87c;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--mono); font-size: 12px;
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.logo { font-family: var(--sans); font-weight: 800; font-size: 15px; color: var(--accent); }
+.logo span { color: var(--text); }
+.sheet-badge { margin-left: auto; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+.badge-lc  { background: rgba(232,184,75,0.15);  color: var(--accent); }
+.badge-def { background: rgba(75,232,184,0.15);  color: var(--accent2); }
+.badge-inp { background: rgba(184,75,232,0.15);  color: var(--accent3); }
+
+/* ── Project tabs ── */
+.tabs {
+  display: flex; gap: 4px; padding: 8px 10px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-shrink: 0; flex-wrap: wrap;
+}
+.tab {
+  padding: 4px 10px; border-radius: 5px; font-size: 11px;
+  border: 1px solid var(--border); cursor: pointer; color: var(--muted);
+  background: transparent; font-family: var(--mono); transition: all 0.15s;
+}
+.tab:hover { border-color: var(--accent2); color: var(--accent2); }
+.tab.active { background: var(--accent); color: #0d0f14; border-color: var(--accent); font-weight: 500; }
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex; gap: 6px; padding: 8px 10px;
+  background: var(--surface2); border-bottom: 1px solid var(--border);
+  flex-shrink: 0; flex-wrap: wrap; align-items: center;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 11px; border-radius: 5px; border: none; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; font-weight: 500; transition: all 0.15s;
+}
+.btn-primary { background: var(--accent);   color: #0d0f14; }
+.btn-primary:hover { background: #f0c85a; }
+.btn-success { background: var(--success);  color: #0d0f14; }
+.btn-success:hover { opacity: 0.85; }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger  { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-teal    { background: var(--accent2); color: #0d0f14; }
+.toolbar-sep { width: 1px; height: 20px; background: var(--border); }
+.toolbar-lbl { color: var(--muted); font-size: 10px; letter-spacing: 0.5px; }
+
+/* ── Content ── */
+.content { flex: 1; overflow-y: auto; padding: 12px; }
+
+/* ── Forms ── */
+.form-group { margin-bottom: 10px; }
+label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+input, select, textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 5px; padding: 6px 9px;
+  font-family: var(--mono); font-size: 12px; outline: none; transition: border 0.15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 60px; }
+select option { background: var(--surface2); }
+.form-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* ── Card ── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+.card-title { font-family: var(--sans); font-weight: 700; font-size: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.dot        { width: 7px; height: 7px; border-radius: 50%; background: var(--accent);  display: inline-block; flex-shrink: 0; }
+.dot-teal   { background: var(--accent2); }
+.dot-purple { background: var(--accent3); }
+.dot-muted  { background: var(--muted); }
+
+/* ── Table ── */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 480px; }
+th { background: var(--surface2); color: var(--muted); font-weight: 500; padding: 7px 9px; text-align: left; font-size: 10px; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 6px 8px; border-bottom: 1px solid rgba(42,47,69,0.5); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+td input, td select { padding: 4px 6px; font-size: 11px; background: rgba(255,255,255,0.04); border: 1px solid transparent; border-radius: 4px; }
+td input:focus, td select:focus { border-color: var(--accent); background: var(--surface2); }
+.del-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 13px; padding: 2px 5px; border-radius: 3px; transition: all 0.12s; }
+.del-btn:hover { color: var(--danger); background: rgba(232,75,75,0.1); }
+.row-num { color: var(--muted); font-size: 10px; min-width: 20px; text-align: center; }
+
+/* ── Status / Toast ── */
+.status-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 6px 12px; display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+.status-dot.green  { background: var(--success); }
+.status-dot.yellow { background: var(--accent); }
+.status-dot.red    { background: var(--danger); }
+.toast { position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 9px 16px; font-size: 11px; z-index: 999; animation: fadeUp 0.25s ease; white-space: nowrap; }
+.toast.ok  { border-color: var(--success); color: var(--success); }
+.toast.err { border-color: var(--danger);  color: var(--danger); }
+@keyframes fadeUp { from { opacity:0; transform: translateX(-50%) translateY(8px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+.info { background: rgba(75,232,184,0.06); border: 1px solid rgba(75,232,184,0.18); border-radius: 6px; padding: 8px 12px; color: var(--accent2); font-size: 11px; margin-bottom: 10px; line-height: 1.6; }
+.info.warn { background: rgba(232,184,75,0.06); border-color: rgba(232,184,75,0.2); color: var(--accent); }
+.empty { text-align: center; padding: 24px 10px; color: var(--muted); font-size: 11px; }
+.loading { display: flex; align-items: center; justify-content: center; height: 100px; color: var(--muted); gap: 8px; }
+.hidden { display: none !important; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Rail<span>LCA</span></div>
+  <div id="sheet-badge" class="sheet-badge badge-lc">Project LC</div>
+</div>
+
+<div class="tabs" id="proj-tabs"></div>
+
+<div class="toolbar">
+  <button class="btn btn-primary"  onclick="addRow()">＋ New Row</button>
+  <div class="toolbar-sep"></div>
+  <button class="btn btn-teal"     onclick="readFromExcel()">↓ Read Excel</button>
+  <button class="btn btn-success"  onclick="saveToExcel()">💾 Save to Excel</button>
+  <div class="toolbar-sep"></div>
+  <button class="btn btn-outline"  onclick="clearForm()">✕ Clear</button>
+  <div style="margin-left:auto" class="toolbar-lbl" id="row-count"></div>
+</div>
+
+<div class="content" id="content">
+  <div class="loading">Connecting to Excel…</div>
+</div>
+
+<div class="status-bar">
+  <div class="status-dot" id="s-dot"></div>
+  <span id="s-text">Initializing…</span>
+</div>
+
+<script>
+'use strict';
+
+// ── Which sheet are we managing? (from URL ?sheet=) ──
+const params = new URLSearchParams(window.location.search);
+const SHEET  = params.get('sheet') || 'projectlc'; // projectlc | projectdef | projectinput
+
+const SHEET_EXCEL = {
+  projectlc:    'Project LC',
+  projectdef:   'Project Definition',
+  projectinput: 'Project Input',
+}[SHEET];
+
+// ── State ──
+let projects   = ['Project 1','Project 2','Project 3','Project 4','Project 5'];
+let activeProj = 0;
+let store      = {};   // keyed by `${SHEET}_${projIndex}`
+
+// ── Dropdown options (populated from Excel on read) ──
+let componentOptions = [
+  '- 141 RE; Steel Rail','- 136 RE; Steel Rail','- 132 RE; Steel Rail','- 115 RE; Steel Rail',
+  '- 9x7x8; Wooden Tie','- 9x7x8.5; Wooden Tie','- 9x7x9; Wooden Tie','- 9x7x10; Wooden Tie',
+  '- CN Type 55A; Concrete Tie','- CN Type 60C; Concrete Tie',
+  '- 9x7x8.5; Composite Tie','- NARSTCO H12; Steel Tie',
+  '- 6" ; Spike','- 6" x 5/8" Spike',
+  '- 11"; Tie Plate','- 12"; Tie Plate','- 14" Heavier RE; Tie Plate','- 16"; Tie Plate',
+  '- 110-119 RE Standard; Rail Anchor','- 132-141 RE Standard; Rail Anchor',
+  '- Ballast'
+];
+let gangOptions = [
+  'P_Wooden Tie Gang_2060_7hr (B)','P_Rail Gang_2050 ft_7hr (B)',
+  'P_Rail_Grinding_RG400_30 pass-miles_8hr (C)','P_Undercutting_2900_7hr (B)',
+  'Wooden Tie Gang_1800_6hr','Wooden Tie Gang_1920_6hr (B)',
+  'Rail Gang_1500 ft_ 6hr (B)','Rail Gang_1700 ft_7hr (B)','Rail Gang_2400 ft_7hr (B)',
+  'Undercutting_2600ft_6hr (B)','Undercutting_2900_7hr (B)',
+  'Concrete Tie Gang_2000_6hr (A)','Surface Gang 13400ft_6hr (A)',
+  'Rail_Grinding_RG400_10miles_7hr (C)'
+];
+const PI_UNITS   = ['Tie','linear feet rail','Spike','Rail Anchor','Tie Plates','linear feet of track','Fastening'];
+const MEAS_UNITS = ['ft3','lb','m3','kg','linear feet'];
+
+// ================================================================
+// OFFICE INIT
+// ================================================================
+Office.onReady(info => {
+  if (info.host === Office.HostType.Excel) {
+    setupHeader();
+    buildTabs();
+    readFromExcel();
+  } else {
+    setStatus('Open inside Excel desktop', 'red');
+    document.getElementById('content').innerHTML =
+      '<div class="info warn">⚠ This add-in only works inside Microsoft Excel desktop.</div>';
+  }
+});
+
+// ================================================================
+// HEADER
+// ================================================================
+function setupHeader() {
+  const b = document.getElementById('sheet-badge');
+  const map = {
+    projectlc:    ['Project LC',         'badge-lc'],
+    projectdef:   ['Project Definition', 'badge-def'],
+    projectinput: ['Project Input',      'badge-inp'],
+  };
+  b.textContent = map[SHEET][0];
+  b.className   = 'sheet-badge ' + map[SHEET][1];
+}
+
+// ================================================================
+// TABS
+// ================================================================
+function buildTabs() {
+  document.getElementById('proj-tabs').innerHTML =
+    projects.map((p,i) =>
+      `<button class="tab ${i===activeProj?'active':''}" onclick="switchProject(${i})">${p}</button>`
+    ).join('');
+}
+
+async function switchProject(i) {
+  collectFormData();
+  activeProj = i;
+  buildTabs();
+  renderPage();
+}
+
+// ================================================================
+// RENDER ROUTER
+// ================================================================
+function renderPage() {
+  if (SHEET === 'projectlc')    renderLC();
+  if (SHEET === 'projectdef')   renderDef();
+  if (SHEET === 'projectinput') renderInput();
+  updateRowCount();
+}
+
+// ================================================================
+// PROJECT LC
+// ================================================================
+function renderLC() {
+  const d = getStore();
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> Project Identity</div>
+      <div class="form-row">
+        <div class="form-group"><label>Project Name</label><input id="f-name" value="${esc(d.name||'')}"></div>
+        <div class="form-group"><label>Location</label><input id="f-location" value="${esc(d.location||'')}"></div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group"><label>Life Span (Yrs)</label><input id="f-lifespan" type="number" value="${d.lifeSpan||60}"></div>
+        <div class="form-group"><label>Route (Miles)</label><input id="f-route" type="number" value="${d.route||10}"></div>
+        <div class="form-group"><label>Tonnage (MGTA)</label><input id="f-tonnage" type="number" value="${d.tonnage||19}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tangent Fraction</label><input id="f-tangent" type="number" step="0.01" value="${d.tangent||0.7}"></div>
+        <div class="form-group"><label>Curve Fraction</label><input id="f-curve" type="number" step="0.01" value="${d.curve||0.3}"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-teal"></span> Infrastructure Inventory</div>
+      <div class="form-row-3">
+        <div class="form-group"><label>Wooden Ties (#)</label><input id="f-woodtie"   type="number" value="${d.woodenTies||32500}"></div>
+        <div class="form-group"><label>Steel Rail (LF)</label><input id="f-steelrail" type="number" value="${d.steelRail||105600}"></div>
+        <div class="form-group"><label>Ballast (LF)</label><input id="f-ballast"      type="number" value="${d.ballast||52800}"></div>
+        <div class="form-group"><label>Spikes (#)</label><input id="f-spikes"         type="number" value="${d.spikes||195000}"></div>
+        <div class="form-group"><label>Tie Plate (#)</label><input id="f-tieplate"    type="number" value="${d.tiePlate||65000}"></div>
+        <div class="form-group"><label>Rail Anchor (#)</label><input id="f-railanchor" type="number" value="${d.railAnchor||65000}"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span> Maintenance Cycle</div>
+      <div class="form-row">
+        <div class="form-group"><label>Tangent Cycle</label><input id="f-maint-tang" type="number" value="${d.maintTangent||''}"></div>
+        <div class="form-group"><label>Curve Cycle</label><input id="f-maint-curv"   type="number" value="${d.maintCurve||''}"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-muted"></span> Notes</div>
+      <div class="form-group"><label>Prepared By</label><input id="f-prepby" value="${esc(d.preparedBy||'')}"></div>
+      <div class="form-group"><label>Remarks</label><textarea id="f-remarks">${esc(d.remarks||'')}</textarea></div>
+    </div>`;
+}
+
+function collectLC() {
+  const d = getStore();
+  d.name        = val('f-name');      d.location  = val('f-location');
+  d.lifeSpan    = num('f-lifespan'); d.route      = num('f-route');
+  d.tonnage     = num('f-tonnage');  d.tangent    = num('f-tangent');
+  d.curve       = num('f-curve');
+  d.woodenTies  = num('f-woodtie');  d.steelRail  = num('f-steelrail');
+  d.ballast     = num('f-ballast');  d.spikes     = num('f-spikes');
+  d.tiePlate    = num('f-tieplate'); d.railAnchor = num('f-railanchor');
+  d.maintTangent= num('f-maint-tang'); d.maintCurve = num('f-maint-curv');
+  d.preparedBy  = val('f-prepby');   d.remarks    = val('f-remarks');
+}
+
+// ================================================================
+// PROJECT DEFINITION
+// ================================================================
+function renderDef() {
+  const d = getStore();
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-title"><span class="dot dot-teal"></span> ${projects[activeProj]}</div>
+      <div class="form-row">
+        <div class="form-group"><label>Project Name</label><input id="f-pname" value="${esc(d.projectName||'')}"></div>
+        <div class="form-group"><label>Route</label><input id="f-route" value="${esc(d.route||'')}"></div>
+      </div>
+      <div class="form-group"><label>Location</label><input id="f-location" value="${esc(d.location||'')}"></div>
+      <div class="form-group"><label>Scope Description</label><textarea id="f-scope">${esc(d.scope||'')}</textarea></div>
+      <div class="form-group"><label>Material (A1-A3)</label><textarea id="f-material">${esc(d.material||'')}</textarea></div>
+      <div class="form-group"><label>Transportation (A4)</label><textarea id="f-transport">${esc(d.transport||'')}</textarea></div>
+      <div class="form-group"><label>Installation (A5)</label><textarea id="f-install">${esc(d.install||'')}</textarea></div>
+      <div class="form-group"><label>Prepared By</label><input id="f-prepby" value="${esc(d.preparedBy||'')}"></div>
+      <div class="form-group"><label>Remarks</label><textarea id="f-remarks">${esc(d.remarks||'')}</textarea></div>
+    </div>`;
+}
+
+function collectDef() {
+  const d = getStore();
+  d.projectName = val('f-pname');  d.route     = val('f-route');
+  d.location    = val('f-location'); d.scope   = val('f-scope');
+  d.material    = val('f-material'); d.transport = val('f-transport');
+  d.install     = val('f-install');  d.preparedBy= val('f-prepby');
+  d.remarks     = val('f-remarks');
+}
+
+// ================================================================
+// PROJECT INPUT
+// ================================================================
+function renderInput() {
+  const d = getStore();
+  if (!d.matRows)  d.matRows  = [];
+  if (!d.gangRows) d.gangRows = [];
+
+  const matHtml = d.matRows.length === 0
+    ? `<tr><td colspan="8" class="empty">No rows — click ＋ New Row to add</td></tr>`
+    : d.matRows.map((r,i) => `
+        <tr>
+          <td class="row-num">${i+1}</td>
+          <td><select onchange="matChange(${i},'component',this.value)" style="min-width:140px">
+            ${componentOptions.map(c=>`<option ${c===r.component?'selected':''}>${c}</option>`).join('')}
+          </select></td>
+          <td><input type="number" value="${r.quantity||0}" style="width:68px" onchange="matChange(${i},'quantity',this.value)"></td>
+          <td><select onchange="matChange(${i},'piUnit',this.value)">
+            ${PI_UNITS.map(u=>`<option ${u===r.piUnit?'selected':''}>${u}</option>`).join('')}
+          </select></td>
+          <td><input type="number" value="${r.amtPerPI||0}" style="width:58px" onchange="matChange(${i},'amtPerPI',this.value)"></td>
+          <td><input type="number" value="${r.truck||0}" style="width:52px" onchange="matChange(${i},'truck',this.value)"></td>
+          <td><input type="number" value="${r.train||0}" style="width:52px" onchange="matChange(${i},'train',this.value)"></td>
+          <td><button class="del-btn" onclick="delMatRow(${i})">✕</button></td>
+        </tr>`).join('');
+
+  const gangHtml = d.gangRows.length === 0
+    ? `<tr><td colspan="4" class="empty">No gang rows — click ＋ Add Gang below</td></tr>`
+    : d.gangRows.map((g,i) => `
+        <tr>
+          <td class="row-num">${i+1}</td>
+          <td><select onchange="gangChange(${i},'gangName',this.value)" style="min-width:180px">
+            ${gangOptions.map(gn=>`<option ${gn===g.gangName?'selected':''}>${gn}</option>`).join('')}
+          </select></td>
+          <td><input type="number" value="${g.interventions||0}" style="width:70px" onchange="gangChange(${i},'interventions',this.value)"></td>
+          <td><button class="del-btn" onclick="delGangRow(${i})">✕</button></td>
+        </tr>`).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> Material Quantities &amp; Transportation</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Component</th><th>Qty</th><th>PI Unit</th><th>Amt/PI</th><th>Truck mi</th><th>Train mi</th><th></th></tr></thead>
+          <tbody>${matHtml}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-teal"></span> Equipment Gang — Installation (A5)</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Gang Name</th><th>Interventions</th><th></th></tr></thead>
+          <tbody>${gangHtml}</tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline" style="font-size:11px;margin-top:6px" onclick="addGangRow()">＋ Add Gang</button>
+    </div>`;
+}
+
+function matChange(i,f,v)  { const d=getStore(); d.matRows[i][f]  = isNaN(v)?v:parseFloat(v); }
+function gangChange(i,f,v) { const d=getStore(); d.gangRows[i][f] = isNaN(v)?v:parseFloat(v); }
+function delMatRow(i)  { getStore().matRows.splice(i,1);  renderInput(); }
+function delGangRow(i) { getStore().gangRows.splice(i,1); renderInput(); }
+function addGangRow()  {
+  const d = getStore();
+  if (!d.gangRows) d.gangRows = [];
+  d.gangRows.push({ gangName: gangOptions[0], interventions: 0 });
+  renderInput();
+}
+
+// ================================================================
+// ADD ROW (toolbar)
+// ================================================================
+function addRow() {
+  if (SHEET !== 'projectinput') { toast('Edit using the form fields above', 'ok'); return; }
+  const d = getStore();
+  if (!d.matRows) d.matRows = [];
+  d.matRows.push({ component: componentOptions[0], quantity: 0, piUnit: PI_UNITS[0], amtPerPI: 0, truck: 0, train: 0 });
+  renderInput();
+}
+
+// ================================================================
+// CLEAR
+// ================================================================
+function clearForm() {
+  store[key()] = {};
+  renderPage();
+  toast('Form cleared', 'ok');
+}
+
+// ================================================================
+// COLLECT
+// ================================================================
+function collectFormData() {
+  try {
+    if (SHEET === 'projectlc')  collectLC();
+    if (SHEET === 'projectdef') collectDef();
+  } catch(e) {}
+}
+
+// ================================================================
+// READ FROM EXCEL
+// ================================================================
+async function readFromExcel() {
+  setStatus('Reading from Excel…', 'yellow');
+  try {
+    await Excel.run(async ctx => {
+      const wb = ctx.workbook;
+
+      // ── Pull project names from Project LC sheet ──
+      try {
+        const lcWs   = wb.worksheets.getItem('Project LC');
+        const nameR  = lcWs.getRange('D2:H2');
+        nameR.load('values');
+        await ctx.sync();
+        nameR.values[0].forEach((v,i) => { if (v && String(v).trim()) projects[i] = String(v).trim(); });
+        buildTabs();
+      } catch(e) {}
+
+      // ── Pull component library ──
+      try {
+        const cWs = wb.worksheets.getItem('Component Library');
+        const cR  = cWs.getRange('B1:B80');
+        cR.load('values');
+        await ctx.sync();
+        const comps = cR.values.flat().filter(v => v && String(v).startsWith('-'));
+        if (comps.length) componentOptions = comps.map(String);
+      } catch(e) {}
+
+      // ── Pull gang library ──
+      try {
+        const gWs = wb.worksheets.getItem('Equipment Gang Library');
+        const gR  = gWs.getRange('B2:B40');
+        gR.load('values');
+        await ctx.sync();
+        const gangs = gR.values.flat().filter(v => v && String(v).length > 3);
+        if (gangs.length) gangOptions = gangs.map(String);
+      } catch(e) {}
+
+      // ── Read the target sheet ──
+      const ws  = wb.worksheets.getItem(SHEET_EXCEL);
+      const rng = ws.getUsedRange();
+      rng.load('values');
+      await ctx.sync();
+      const rows = rng.values;
+
+      if (SHEET === 'projectlc')    parseLCRows(rows);
+      if (SHEET === 'projectdef')   parseDefRows(rows);
+      if (SHEET === 'projectinput') parseInputRows(rows);
+    });
+
+    renderPage();
+    setStatus(`Loaded from "${SHEET_EXCEL}"`, 'green');
+    toast('Data loaded ✓', 'ok');
+  } catch(err) {
+    setStatus('Read error — is the file open?', 'red');
+    toast('Error: ' + err.message, 'err');
+    renderPage();
+  }
+}
+
+// ── Parsers ──
+function parseLCRows(rows) {
+  for (let p=0; p<5; p++) {
+    const c = p+3;
+    const s = getStoreFor(p);
+    const g = r => rows[r]&&rows[r][c]!==undefined ? rows[r][c] : '';
+    s.name=g(1); s.location=g(2); s.lifeSpan=g(3); s.route=g(4);
+    s.tangent=g(5); s.curve=g(6); s.tonnage=g(7);
+    s.woodenTies=g(10); s.steelRail=g(11); s.ballast=g(12);
+    s.spikes=g(13); s.tiePlate=g(14); s.railAnchor=g(15);
+    s.maintTangent=g(17); s.maintCurve=g(18);
+    s.preparedBy=g(20); s.remarks=g(21);
+  }
+}
+
+function parseDefRows(rows) {
+  for (let p=0; p<5; p++) {
+    const c = p+3;
+    const s = getStoreFor(p);
+    const g = r => rows[r]&&rows[r][c]!==undefined ? String(rows[r][c]) : '';
+    s.projectName=g(3); s.route=g(4); s.location=g(5);
+    s.scope=g(6); s.material=g(7); s.transport=g(8);
+    s.install=g(9); s.preparedBy=g(10); s.remarks=g(11);
+  }
+}
+
+function parseInputRows(rows) {
+  for (let p=0; p<5; p++) { const s=getStoreFor(p); s.matRows=[]; s.gangRows=[]; }
+  let cp = -1;
+  for (let r=0; r<rows.length; r++) {
+    const row  = rows[r];
+    const c0   = String(row[0]||'').trim();
+    const c1   = String(row[1]||'').trim();
+    const m    = c0.match(/^Project\s+(\d+)\s*:/i);
+    if (m) { cp = parseInt(m[1])-1; if (cp>=0&&cp<5) getStoreFor(cp).projectName = c1; continue; }
+    if (cp<0||cp>=5) continue;
+    const s = getStoreFor(cp);
+    if (c0.startsWith('-') && row[1]!==undefined && row[1]!=='') {
+      s.matRows.push({ component:c0, quantity:parseFloat(row[1])||0, piUnit:String(row[2]||''), amtPerPI:parseFloat(row[3])||0, truck:parseFloat(row[7])||0, train:parseFloat(row[8])||0 });
+    }
+    if (row[11] && String(row[11]).trim().length>3) {
+      s.gangRows.push({ gangName:String(row[11]).trim(), interventions:parseFloat(row[12])||0 });
+    }
+  }
+}
+
+// ================================================================
+// SAVE TO EXCEL
+// ================================================================
+async function saveToExcel() {
+  collectFormData();
+  setStatus('Saving to Excel…', 'yellow');
+  try {
+    await Excel.run(async ctx => {
+      const ws = ctx.workbook.worksheets.getItem(SHEET_EXCEL);
+      if (SHEET === 'projectlc')    writeLCRows(ws);
+      if (SHEET === 'projectdef')   writeDefRows(ws);
+      if (SHEET === 'projectinput') writeInputRows(ws);
+      await ctx.sync();
+    });
+    setStatus(`Saved to "${SHEET_EXCEL}" ✓`, 'green');
+    toast('Saved to Excel ✓', 'ok');
+  } catch(err) {
+    setStatus('Save error', 'red');
+    toast('Save error: ' + err.message, 'err');
+  }
+}
+
+function writeLCRows(ws) {
+  ['D','E','F','G','H'].forEach((col,p) => {
+    const s = getStoreFor(p);
+    const w = (row,v) => { ws.getRange(`${col}${row}`).values = [[v??'']]; };
+    w(2,s.name);       w(3,s.location);    w(4,s.lifeSpan);
+    w(5,s.route);      w(6,s.tangent);     w(7,s.curve);
+    w(8,s.tonnage);    w(9,(s.lifeSpan||0)*(s.tonnage||0));
+    w(11,s.woodenTies); w(12,s.steelRail); w(13,s.ballast);
+    w(14,s.spikes);    w(15,s.tiePlate);   w(16,s.railAnchor);
+    w(18,s.maintTangent); w(19,s.maintCurve);
+    w(21,s.preparedBy);   w(22,s.remarks);
+  });
+}
+
+function writeDefRows(ws) {
+  ['D','E','F','G','H'].forEach((col,p) => {
+    const s = getStoreFor(p);
+    const w = (row,v) => { ws.getRange(`${col}${row}`).values = [[v??'']]; };
+    w(4,s.projectName); w(5,s.route);    w(6,s.location);
+    w(7,s.scope);       w(8,s.material); w(9,s.transport);
+    w(10,s.install);    w(11,s.preparedBy); w(12,s.remarks);
+  });
+}
+
+function writeInputRows(ws) {
+  const BLOCK = 25;
+  for (let p=0; p<5; p++) {
+    const s   = getStoreFor(p);
+    const base= 3 + p*BLOCK;
+    ws.getRange(`A${base}`).values   = [[`Project ${p+1}:`]];
+    ws.getRange(`B${base}`).values   = [[s.projectName||projects[p]]];
+    ws.getRange(`A${base+2}:N${base+2}`).values = [[
+      'Component','Pay Item Quantity','Pay Item Unit','Amount/PI Unit','Measurement Unit','',
+      'Total Mass (lb)','Truck Miles','Train Miles','Barge Miles','','Gang Name','Interventions','Energy (MJ)'
+    ]];
+    const max = Math.max(s.matRows.length, s.gangRows.length, 1);
+    for (let i=0; i<max; i++) {
+      const mr = s.matRows[i]  || {};
+      const gr = s.gangRows[i] || {};
+      ws.getRange(`A${base+3+i}:N${base+3+i}`).values = [[
+        mr.component||'', mr.quantity||'', mr.piUnit||'', mr.amtPerPI||'','','',
+        '', mr.truck||'', mr.train||'','',
+        '', gr.gangName||'', gr.interventions||'', ''
+      ]];
+    }
+  }
+}
+
+// ================================================================
+// STORE / UTILS
+// ================================================================
+function key()        { return `${SHEET}_${activeProj}`; }
+function keyFor(p)    { return `${SHEET}_${p}`; }
+function getStore()   { if (!store[key()])    store[key()]    = {}; return store[key()]; }
+function getStoreFor(p){ if (!store[keyFor(p)]) store[keyFor(p)] = {}; return store[keyFor(p)]; }
+
+function val(id) { const e=document.getElementById(id); return e?e.value.trim():''; }
+function num(id) { const e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; }
+function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function updateRowCount() {
+  const d = getStore();
+  document.getElementById('row-count').textContent =
+    SHEET==='projectinput' ? `${(d.matRows||[]).length} mat · ${(d.gangRows||[]).length} gang` : '';
+}
+
+function setStatus(msg, color) {
+  document.getElementById('s-text').textContent = msg;
+  document.getElementById('s-dot').className = 'status-dot' + (color?' '+color:'');
+}
+
+let _toastT;
+function toast(msg, type) {
+  clearTimeout(_toastT);
+  document.querySelector('.toast')?.remove();
+  const el = Object.assign(document.createElement('div'), { className:`toast ${type}`, textContent:msg });
+  document.body.appendChild(el);
+  _toastT = setTimeout(()=>el.remove(), 3000);
+}
+</script>
+</body>
+</html>

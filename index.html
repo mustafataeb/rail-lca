@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rail-LCA Add-in</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+:root { --bg:#0d0f14; --surface:#141720; --border:#2a2f45; --accent:#e8b84b; --accent2:#4be8b8; --text:#e8ecf0; --muted:#6b7280; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; font-size:14px; min-height:100vh; }
+.hero { max-width:780px; margin:0 auto; padding:60px 24px 40px; }
+.logo { font-family:'Syne',sans-serif; font-weight:800; font-size:36px; color:var(--accent); margin-bottom:6px; }
+.logo span { color:var(--text); }
+.tagline { color:var(--muted); margin-bottom:40px; font-size:14px; }
+.steps { display:flex; flex-direction:column; gap:16px; }
+.step { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px 24px; display:flex; gap:18px; align-items:flex-start; }
+.step-num { width:36px; height:36px; border-radius:8px; background:rgba(232,184,75,0.15); color:var(--accent); font-family:'Syne',sans-serif; font-weight:800; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.step-body h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; margin-bottom:6px; }
+.step-body p  { color:var(--muted); line-height:1.7; font-size:13px; }
+.step-body code { background:var(--border); padding:2px 7px; border-radius:4px; font-size:12px; color:var(--accent2); }
+.divider { height:1px; background:var(--border); margin:32px 0; }
+.badge-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.badge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:500; }
+.b1 { background:rgba(232,184,75,0.15);  color:var(--accent); }
+.b2 { background:rgba(75,232,184,0.15);  color:var(--accent2); }
+.b3 { background:rgba(184,75,232,0.15);  color:#b84be8; }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:7px; border:none; cursor:pointer; font-family:'DM Mono',monospace; font-size:13px; font-weight:500; text-decoration:none; }
+.btn-accent { background:var(--accent); color:#0d0f14; }
+.btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+footer { text-align:center; padding:32px; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="logo">Rail<span>LCA</span></div>
+  <div class="tagline">Excel Add-in — served from GitHub Pages · No local server needed</div>
+
+  <div class="badge-row" style="margin-bottom:32px">
+    <span class="badge b1">📋 Project LC</span>
+    <span class="badge b2">🗂 Project Definition</span>
+    <span class="badge b3">⚡ Project Input</span>
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Download the package</h3>
+        <p>Download <strong>rail-lca-github.zip</strong> from the repository's Releases page and unzip it to a permanent folder on your computer, e.g. <code>C:\Rail-LCA-Addin\</code>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Edit manifest.xml</h3>
+        <p>Open <code>manifest.xml</code> in Notepad and replace <code>YOUR-USERNAME</code> and <code>YOUR-REPO</code> with your actual GitHub username and repository name everywhere they appear.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Register with Excel</h3>
+        <p>Double-click <code>INSTALL-ADDIN.bat</code> (run as administrator if it fails). This writes the manifest path into the Windows registry so Excel finds it. You only do this once.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>Open Rail-LCA.xlsx in Excel</h3>
+        <p>You will see a new <strong>"Rail-LCA"</strong> tab appear in the Excel ribbon. No server needed — the task pane loads directly from this GitHub Pages URL.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h3>Click a ribbon button → use the task pane</h3>
+        <p>Each button opens a side panel for that sheet. Click <strong>↓ Read Excel</strong> to load data, edit your fields or table rows, then click <strong>💾 Save to Excel</strong>. Changes write directly into your open <code>.xlsx</code> file — no download or copy-paste needed.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <p style="color:var(--muted);font-size:13px;line-height:1.8">
+    The add-in uses the <strong>Office.js Excel API</strong> to read and write directly to worksheet cells.<br>
+    All three input sheets (Project LC, Project Definition, Project Input) support full Create / Read / Update / Delete.<br>
+    Dropdowns are auto-populated from your Component Library and Equipment Gang Library sheets.
+  </p>
+</div>
+
+<footer>Rail-LCA Add-in · GitHub Pages hosted · Office.js powered</footer>
+</body>
+</html>
